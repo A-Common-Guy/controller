@@ -47,9 +47,9 @@ void verbose_buttons() {
 
 void calibrate(){
   Serial.println("Calibrating");
-  display.clearDisplay();
+
   display_alert(">>CALIBRATING");
-  display.display();
+
   uint32_t start = millis();
   int16_t centermean[] = {0, 0, 0, 0};
   int16_t centerdeviation[] = {0, 0, 0, 0};
@@ -58,9 +58,9 @@ void calibrate(){
   int16_t ceil_[] = {0, 0, 0, 0};
   int16_t ceil_deviation[] = {0, 0, 0, 0};
   int counter=1;
-  display.clearDisplay();
+
   display_alert(">>STAY STILL");
-  display.display();
+
   delay(2000);
   while(millis() - start < 3000){
     for (int i = 0; i < 4; i++) {
@@ -81,9 +81,8 @@ void calibrate(){
   for(int i=0; i<4; i++){
     centerdeviation[i] = centerdeviation[i]*2;
   }
-  display.clearDisplay();
+
   display_alert(">>JOY DOWN-LEFT\0");
-  display.display();
 
   delay(2000);
 
@@ -96,9 +95,8 @@ void calibrate(){
     counter++;
   }
   
-  display.clearDisplay();
+
   display_alert(">>JOY UP-RIGHT\0");
-  display.display();
 
   delay(2000);
   
@@ -133,9 +131,9 @@ void calibrate(){
   Serial.println();
   Serial.println("Calibration finished");
   Serial.println("----------------------");
-  display.clearDisplay();
+
   display_alert("Calibration finished");
-  display.display();
+
   delay(1000);
   loading_sequence("Uploading",1000,4);
   DynamicJsonDocument doc(1024);

@@ -23,16 +23,19 @@
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define OLED_RESET     -1
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-
+//Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+U8G2_SSD1306_128X32_UNIVISION_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
 //calibration
 #define LOG Serial.println("LOG")
 int first = 1;
+int no_cal_data = 0;
 int16_t center[4] = {13000,13000,13000,13000};
 int16_t deviation[4] = {500,500,500,500};
 int16_t floor_[4] = {30,30,30,30};
 int16_t ceil_[4] = {26000,26000,26000,26000};
+int16_t floor_deviation[4] = {30,30,30,30};
+int16_t ceil_deviation[4] = {26000,26000,26000,26000};
 
 
 //ADC init
@@ -74,9 +77,6 @@ void IRAM_ATTR TimerHandler0(void);
 
 
 
-
-
-
 //blinker
 ESP32Timer ITimer(1);
 ESP32_ISR_Timer ISR_Timer;
@@ -86,7 +86,7 @@ ESP32_ISR_Timer ISR_Timer;
 //Json handler
 const size_t capacity=1024;
 DynamicJsonDocument doc(capacity);
-
+JsonObject obj;
 
 
 //startup status pin
@@ -186,13 +186,10 @@ void setup() {
   state = HANDSHAKING_SEND;
 
     //init oled
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x64
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
-  } 
+  oled_init();
   //show logo on oled
   display_logo();
-  display.display(); 
+ // display.display(); 
 
   //blinker init at 0.5s
   ITimer0.attachInterruptInterval(TIMER0_INTERVAL_MS * 1000, TimerHandler0);
@@ -203,10 +200,15 @@ void setup() {
 
 void loop() {
   if(first){
+
     for(int i = 0; i < 4; i++){
-      if(digitalRead(KEY1)){
+      if(digitalRead(KEY1) || no_cal_data){
         recalibrate=1;
       }
+      else{
+        obj=getJSonFromFile(&doc,PATH_CALIBRATION_DATA);
+      }
+
     }
   }
   if (recalibrate && first) {

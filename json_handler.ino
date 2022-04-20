@@ -29,7 +29,7 @@ bool saveJSonToAFile(fs::FS &fs,DynamicJsonDocument *doc, String filename) {
 
 
 
-JsonObject getJSonFromFile(DynamicJsonDocument *doc, String filename, bool forceCleanONJsonError = true ) {
+void getJSonFromFile(DynamicJsonDocument *doc, String filename, bool forceCleanONJsonError = true ) {
     // open the file for reading:
     File file = SD.open(filename);
     if (file) {
@@ -42,21 +42,21 @@ JsonObject getJSonFromFile(DynamicJsonDocument *doc, String filename, bool force
             Serial.println(error.c_str());
  
             if (forceCleanONJsonError){
-                return doc->to<JsonObject>();
+                //return doc->to<JsonObject>();
             }
         }
  
         // close the file:
         file.close();
  
-        return doc->as<JsonObject>();
+        //return doc->as<JsonObject>();
     } else {
         // if the file didn't open, print an error:
         Serial.print(F("Error opening (or file not exists) "));
         Serial.println(filename);
  
         Serial.println(F("Empty json created"));
-        return doc->to<JsonObject>();
+        //return doc->to<JsonObject>();
     }
  
 }

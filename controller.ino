@@ -86,7 +86,6 @@ ESP32_ISR_Timer ISR_Timer;
 //Json handler
 const size_t capacity=1024;
 DynamicJsonDocument doc(capacity);
-JsonObject obj;
 
 
 //startup status pin
@@ -200,17 +199,26 @@ void setup() {
 
 void loop() {
   if(first){
-
-    for(int i = 0; i < 4; i++){
-      if(digitalRead(KEY1) || no_cal_data){
-        recalibrate=1;
-      }
-      else{
-        obj=getJSonFromFile(&doc,PATH_CALIBRATION_DATA);
-      }
-
+    if(SD.exists(PATH_CALIBRATION_DATA)){
+      no_cal_data = 0;
     }
-  }
+
+    if(digitalRead(KEY1) || no_cal_data){
+      recalibrate=1;
+    }
+    else{
+      Serial.println("Reading calibration data");
+      getJSonFromFile(&doc,PATH_CALIBRATION_DATA);
+      for(int i=0;i<4;i++){
+        center[i] = doc["center"][i];
+        deviation[i] = doc["deviation"][i];
+        floor_[i] = doc["floor"][i];
+        ceil_[i] = doc["ceil"][i];
+        floor_deviation[i] = doc["floor_deviation"][i];
+        ceil_deviation[i] = doc["ceil_deviation"][i];
+      }
+    }
+  }     
   if (recalibrate && first) {
 
     ITimer0.stopTimer();
